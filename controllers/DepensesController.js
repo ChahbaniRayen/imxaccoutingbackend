@@ -192,7 +192,7 @@ const deleteDepense = async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID invalide" });
-    }
+    } 
 
     const deletedDepense = await Depenses.findByIdAndDelete(id);
     if (!deletedDepense) {
@@ -218,8 +218,9 @@ const getAllcategoriesDepenses = async (req, res) => {
 };
 const getAllfinacesDepenses = async (req, res) => {
   try {
-    const finances = await Depenses.find().distinct("finances");
-    return res.status(200).json(finances);
+    const finances = await Depenses.find({}, 'finances'); 
+
+    res.status(200).json(finances);
   } catch (error) {
     return res
       .status(500)
