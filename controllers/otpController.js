@@ -1,6 +1,6 @@
-const otpGenerator = require('otp-generator');
-const OTP = require('../models/otpModel');
-const User = require('../models/User');
+const otpGenerator = require("otp-generator");
+const OTP = require("../models/otpModel");
+const User = require("../models/User");
 
 exports.sendOTP = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ exports.sendOTP = async (req, res) => {
     if (!checkUserPresent) {
       return res.status(401).json({
         success: false,
-        message: 'L\'utilisateur n\'est  enregistré',
+        message: "L'utilisateur n'est  enregistré",
       });
     }
 
@@ -36,7 +36,7 @@ exports.sendOTP = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'OTP envoyé avec succès',
+      message: "OTP envoyé avec succès",
       otp,
     });
   } catch (error) {
@@ -46,7 +46,7 @@ exports.sendOTP = async (req, res) => {
       error: error.message,
     });
   }
-}; 
+};
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -55,7 +55,7 @@ exports.verifyOTP = async (req, res) => {
     const otpRecord = await OTP.findOne({ email, otp });
 
     if (!otpRecord) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "OTP invalide ou expiré",
       });
@@ -76,4 +76,3 @@ exports.verifyOTP = async (req, res) => {
     });
   }
 };
-

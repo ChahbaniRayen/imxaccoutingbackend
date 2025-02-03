@@ -1,29 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const DepensesSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
-  date: { type: Date, required: true },
+  date: { type: Date },
   category: [
     {
-      categoryName: { type: String, required: true }, 
-      subcategories: [{ type: String, required: false }], 
+      categoryName: { type: String },
+      subcategories: [{ type: String }],
     },
   ],
-  description: { type: String, required: true },
-  account: { type: String, required: true },
+  description: { type: String },
+  account: { type: String },
   finances: [
     {
-      type: { type: String, enum: ['credit', 'debit'], required: true },
-      finsubcategory1: { 
-        finsubcategoryname : { type: String, required: true },
-        finsubcategory2: [{ type: String, required: true }],
-      },
-      balance: { type: Number, required: true },
+      type: { type: String, enum: ["credit", "debit"] },
+
+      finsubcategoryname: { type: String },
+      finsubcategory2: [{ type: String }],
+
+      balance: { type: Number },
     },
   ],
-  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+  company: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
 });
 
-const Depenses = mongoose.model('Depenses', DepensesSchema);
+const Depenses = mongoose.model("Depenses", DepensesSchema);
 
 module.exports = Depenses;
