@@ -162,7 +162,7 @@ const createDepense = async (req, res) => {
     ///category logic
     console.log(selectedPath, "selectedPath");
 
-    const categoryData = transformData(selectedPath.reverse());
+    const categoryData = transformData(selectedPath);
     console.log(categoryData, "categoryData");
 
     const depense = new Depenses({
