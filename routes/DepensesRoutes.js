@@ -9,6 +9,7 @@ const {
   getAportDepenses,
   getAllcategoriesDepenses,
   getAllfinacesDepenses,
+  getAllAcountDepenses,
 } = require("../controllers/DepensesController");
 const {
   getTypeFinSubcategory2,
@@ -33,4 +34,6 @@ DepensesRouter.delete("/depenses/:id", deleteDepense);
 DepensesRouter.get("/DepensesApport/:id", getAportDepenses);
 DepensesRouter.get("/getAllcategoriesDepenses", getAllcategoriesDepenses);
 DepensesRouter.get("/getAllfinacesDepenses", getAllfinacesDepenses);
+DepensesRouter.get("/getAllAcountDepenses", getAllAcountDepenses);
+
 module.exports = DepensesRouter;

@@ -16,7 +16,10 @@ const getAportDepenses = async (req, res) => {
       ...depense.toObject(),
       depense: true,
     }));
-    const finalData = [...apportsdataWithFlag, ...depensesdataWithFlag];
+    const finalData = [...apportsdataWithFlag, ...depensesdataWithFlag].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+
     return res.status(200).json({ result: { finalData }, success: true });
   } catch (error) {
     return res.status(500).json({
@@ -77,29 +80,104 @@ const getAportDepenses = async (req, res) => {
 //   }
 // };
 
+function transformData(inputData) {
+  // Create an empty result array
+  const result = [];
+
+  // Variable to store the most recent subcategory name
+  let lastCategoryName = "firstname"; // Starting categoryName
+
+  // Iterate through the input data
+  inputData.forEach((item) => {
+    // Set categoryName to the most recent subcategory name
+    const categoryName = lastCategoryName;
+
+    // Check if the categoryName already exists in the result array
+    let category = result.find((c) => c.categoryName === categoryName);
+
+    // If the category doesn't exist, create a new category
+    if (!category) {
+      category = {
+        categoryName: categoryName,
+        subcategories: [],
+      };
+      result.push(category);
+    }
+
+    // Add the current label as a subcategory under the category
+    category.subcategories.push(item.label);
+
+    // Update lastCategoryName to the current label for the next loop
+    lastCategoryName = item.label;
+  });
+
+  return result;
+}
 const createDepense = async (req, res) => {
   try {
-    const { amount, date, category, description, account, finances, company } =
-      req.body;
-
-    // // Validation des données avant insertion
-    // if (!amount || !date || !category || !description || !account || !company) {
-    //   return res
-    //     .status(400)
-    //     .json({ error: "Tous les champs requis doivent être remplis." });
-    // }
-
-    const newDepense = new Depenses({
+    const {
       amount,
       date,
       category,
       description,
+      financeData,
       account,
       finances,
       company,
+      type,
+      selectedPath,
+    } = req.body;
+    console.log(req.body, "req.body");
+
+    const credits = financeData?.credit;
+    const debits = financeData?.debit;
+
+    const creditsBody = credits.map((fin) => {
+      return {
+        finsubcategoryname: fin.category,
+        value: fin.value,
+        type: "credit",
+        finsubcategory2: Array.isArray(fin.subcategory)
+          ? fin.subcategory.map((sub) => sub.value)
+          : [fin.subcategory.value],
+      };
     });
-    await newDepense.save();
-    return res.status(201).json(newDepense);
+
+    const filterCredits = creditsBody.filter((fin) => fin.finsubcategoryname);
+
+    ///debits
+    const debitsBody = debits.map((fin) => {
+      return {
+        finsubcategoryname: fin.category,
+        value: fin.value,
+
+        type: "debit",
+        finsubcategory2: Array.isArray(fin.subcategory)
+          ? fin.subcategory.map((sub) => sub.value)
+          : [fin.subcategory.value],
+      };
+    });
+    const filterDebits = debitsBody.filter((fin) => fin.finsubcategoryname);
+
+    ///category logic
+    console.log(selectedPath, "selectedPath");
+
+    const categoryData = transformData(selectedPath.reverse());
+    console.log(categoryData, "categoryData");
+
+    const depense = new Depenses({
+      depenseapport: type,
+      amount,
+      finances: [...filterCredits, ...filterDebits],
+      date,
+      description,
+      category: categoryData,
+      // account: acc,
+      company,
+    });
+    await depense.save();
+
+    return res.status(201).json({ success: true });
   } catch (error) {
     console.error(error);
     return res
@@ -192,7 +270,7 @@ const deleteDepense = async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID invalide" });
-    } 
+    }
 
     const deletedDepense = await Depenses.findByIdAndDelete(id);
     if (!deletedDepense) {
@@ -218,9 +296,20 @@ const getAllcategoriesDepenses = async (req, res) => {
 };
 const getAllfinacesDepenses = async (req, res) => {
   try {
-    const finances = await Depenses.find({}, 'finances'); 
+    const finances = await Depenses.find({}, "finances");
 
     res.status(200).json(finances);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Erreur serveur", details: error.message });
+  }
+};
+const getAllAcountDepenses = async (req, res) => {
+  try {
+    const account = await Depenses.find({}, "account");
+
+    res.status(200).json(account);
   } catch (error) {
     return res
       .status(500)
@@ -237,4 +326,5 @@ module.exports = {
   getAportDepenses,
   getAllcategoriesDepenses,
   getAllfinacesDepenses,
+  getAllAcountDepenses,
 };

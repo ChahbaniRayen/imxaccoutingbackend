@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const DepensesSchema = new mongoose.Schema({
+  depenseapport: { type: String, enum: ["apport", "depense"] },
   amount: { type: Number, required: true },
   date: { type: Date },
   category: [
